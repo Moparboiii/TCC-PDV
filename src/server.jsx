@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const connection = require('./db.jsx');
 
 const app = express();
-const port = 5000; // Escolha uma porta para o servidor
+const port = 5000; //porta para o servidor
 
 app.use(express.json());
 app.use(cors());
@@ -22,7 +22,7 @@ connection.query('SELECT * FROM produtos', (err, results) => {
 // Rota para consultar um produto pelo ID
 app.get('/produto/:id', (req, res) => {
   const productId = req.params.id;
-  const query = 'SELECT * FROM produtos WHERE id_produto = ?'; // Supondo que sua tabela se chame "produtos"
+  const query = 'SELECT * FROM produtos WHERE id_produto = ?';
 
   connection.query(query, [productId], (err, result) => {
     if (err) {

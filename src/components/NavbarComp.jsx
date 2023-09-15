@@ -12,17 +12,25 @@ const NavbarComp = () => {
         <img src={Morfeu} alt="" className="foto rounded-full" />
       </div>
       <div className="bg-blue-300 w-full h-[70%] flex flex-col gap-20 justify-center items-center">
-        <Link to="/" className="bg-red-300 w-[90%] h-36 flex justify-center items-center gap-3  hover:animate-jump hover:animate-ease-in-out">
+
+        <Link to="/" className="bg-red-300 w-[90%] h-36 flex justify-center items-center gap-3 rounded-lg hover:animate-jump hover:opacity-75 ease-in-out">
           <img src={Casinha} alt="Tela Home" />
-          <span className="text-2xl"> Home </span>
+          <span className="text-2xl "> Home </span>
         </Link>
-        <Link to="/Venda" className="bg-red-300 w-[90%] h-36 flex justify-center items-center gap-3 hover:animate-jump hover:animate-ease-in-out">
+
+        <Link to="/Venda" className="bg-red-300 w-[90%] h-36 flex justify-center items-center gap-3 hover:animate-jump hover:opacity-75 hover:animate-ease-in-out">
           <img src={Carrinho} alt="Tela de venda" />
-          <span className="text-2xl"> Tela venda </span>
+          <span className="text-2xl"> Tela de venda </span>
         </Link>
-        <Link to="/Sobre" className="bg-red-300 w-[90%] h-36 flex justify-center items-center gap-3 hover:animate-jump hover:animate-ease-in-out">
+
+        <Link to="/Produtos" className="bg-red-300 w-[90%] h-36 flex justify-center items-center gap-3 hover:animate-jump hover:opacity-75 hover:animate-ease-in-out">
+          <img src={Carrinho} alt="Tela de venda" />
+          <span className="text-2xl"> Tela de produtos </span>
+        </Link>
+
+        {/* <Link to="/Sobre" className="bg-red-300 w-[90%] h-36 flex justify-center items-center gap-3 hover:opacity-75 hover:animate-ease-in-out">
           <span className="text-2xl"> Sobre </span>
-        </Link>
+        </Link> */}
 
       </div>
     </div>

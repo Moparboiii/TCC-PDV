@@ -192,13 +192,12 @@ const TelaProdutoPage = () => {
             </div>
 
 
-            <div id="mudal_DEL" className="absolute top-[200px] right-[460px] z-20 bg-slate-400 w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center ">
+            <div id="mudal_DEL" className="absolute top-[200px] right-[460px] z-20 bg-slate-400 w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center hidden">
                 <div id="item_para_excluir" className="w-full h-3/4 flex justify-center items-center rounded-t-md flex-col relative">
-                   
+
                     <h1 className="absolute top-10 text-2xl">Deletando um produto</h1>
 
                     <label className="text-xl"> Tem certeza que seja excluir o produto {selectedItemId} ? </label>
-                    <label className="text-xl"> Nome do Produto: {nome} </label>
 
                 </div>
 

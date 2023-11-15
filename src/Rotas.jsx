@@ -6,6 +6,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import TelaVendaPage from "./pages/TelaVenda";
 import LoginPage from "./pages/LoginPage";
 import TelaProdutoPage from "./pages/TelaProdutos";
+import TelaVendaPage2 from './pages/TelaVenda2';
 
 
 const Rotas = () => {
@@ -13,11 +14,12 @@ const Rotas = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route element={<LoginPage />} path="/login"/>
-        <Route element={<SobrePage/>} path="/sobre" />
-        <Route element={<TelaVendaPage/>} path="/venda" />
-        <Route element={<TelaProdutoPage/>} path="/produtos" />
-        <Route element={<NotFoundPage/>} path="*" />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/sobre" element={<SobrePage />} />
+        <Route path="/venda2" element={<TelaVendaPage />} />
+        <Route path="/venda" element={<TelaVendaPage2 />} />
+        <Route path="/produtos" element={<TelaProdutoPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

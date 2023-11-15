@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import NavbarComp from "../components/NavbarComp";
+import CardProducts from "../components/cards/CardProducts";
+import CrudButton from "../components/buttons/CrudButton";
+import ProductsModal from "../components/modals/ProductsModal";
+import ConfirmCancelButtons from "../components/buttons/ConfirmCancelButtons";
 
 const TelaProdutoPage = () => {
-    let classe1 = document.querySelector("#mudal_INS");
-    let classe2 = document.querySelector("#mudal_EDIT");
-    let classe3 = document.querySelector("#mudal_DEL");
-    let classe4 = document.querySelector("#BtnEditar");
-    let classe5 = document.querySelector("#BtnlDeletar");
+    const classe1 = document.querySelector("#mudal_INS");
+    const classe2 = document.querySelector("#mudal_EDIT");
+    const classe3 = document.querySelector("#mudal_DEL");
+    const classe4 = document.querySelector("#tudao");
     const [products, setProducts] = useState([]);
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [nome, setNome] = useState("");
     const [preco, setPreco] = useState("");
     const [quantidade, setQuantidade] = useState("");
     const [selectedProductData, setSelectedProductData] = useState(null);
+    const [isVisible, setIsVisible] = useState(false)
 
     useEffect(() => {
         async function fetchProdutos() {
@@ -121,33 +125,33 @@ const TelaProdutoPage = () => {
         }
     };
 
-    const aparecer = (classe1) => {
-        classe1.classList.remove("hidden")
+    const aparecer = (element) => {
+        element.classList.remove("hidden")
+        classe4.classList.add("blur-3xl")
     };
-    const sumir = (classe1) => {
-        classe1.classList.add("hidden")
+    const sumir = (element) => {
+        element.classList.add("hidden")
+        classe4.classList.remove("blur-3xl")
     };
 
     const toggleItemSelection = (itemId) => {
         if (selectedItemId === itemId) {
             // Se o item já está selecionado, desmarque-o
             setSelectedItemId(null);
-            sumir(classe4)
-            sumir(classe5)
+            setIsVisible(false)
         } else {
             // Caso contrário, marque o novo item como selecionado
             setSelectedItemId(itemId);
-            aparecer(classe4)
-            aparecer(classe5)
+            setIsVisible(true)
         }
     };
 
     return (
-        <div className="flex justify-center items-center">
+        <div className="flex w-screen h-screen justify-center items-center p-3">
 
             <NavbarComp />
 
-            <div id="mudal_INS" className="absolute top-[200px] right-[460px] z-20 bg-slate-400 w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center hidden">
+            <div id="mudal_INS" className="absolute top-[200px] right-[460px] z-20 bg-[#d9d9d9] w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex-col justify-center items-center hidden">
                 <div id="item_para_excluir" className="w-full h-3/4 flex justify-center items-center rounded-t-md flex-col relative">
 
                     <h1 className="absolute top-10 text-2xl">Inserir um produto</h1>
@@ -164,12 +168,16 @@ const TelaProdutoPage = () => {
                 </div>
 
                 <div id="botoes" className="w-full h-1/4 flex justify-around items-center rounded-b-md">
-                    <button id="ConfirmInsert" onClick={() => handleCreateProduct()} className="bg-gradient-to-br from-indigo-500 rounded-full h-[60%] w-[40%] text-2xl"> Sim </button>
-                    <button id="CancelInsert" onClick={() => sumir(classe1)} className="bg-gradient-to-br from-indigo-500 h-[60%] w-[40%] text-2xl rounded-full"> Não </button>
+                    <button id="ConfirmInsert"
+                        onClick={() => handleCreateProduct()}
+                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Sim </button>
+                    <button id="CancelInsert"
+                        onClick={() => sumir(classe1)}
+                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Não </button>
                 </div>
             </div>
 
-            <div id="mudal_EDIT" className="absolute top-[200px] right-[460px] z-20 bg-slate-400 w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center hidden">
+            <div id="mudal_EDIT" className="absolute top-[200px] right-[460px] z-20 bg-[#d9d9d9] w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center hidden">
                 <div id="item_para_excluir" className="w-full h-3/4 flex justify-center items-center rounded-t-md flex-col relative">
 
                     <h1 className="absolute top-10 text-2xl">Editando um produto</h1>
@@ -186,13 +194,16 @@ const TelaProdutoPage = () => {
                 </div>
 
                 <div id="botoes" className="w-full h-1/4 flex justify-around items-center rounded-b-2xl">
-                    <button id="ConfirmEdit" onClick={() => handleEditConfirmation(selectedProductData.id_produto)} className="bg-gradient-to-br from-indigo-500 rounded-full h-[60%] w-[40%] text-2xl"> Sim </button>
-                    <button id="CancelEdit" onClick={() => sumir(classe2)} className="bg-gradient-to-br from-indigo-500  h-[60%] w-[40%] text-2xl rounded-full"> Não </button>
+                    <button id="ConfirmEdit"
+                        onClick={() => handleEditConfirmation(selectedProductData.id_produto)}
+                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Sim </button>
+                    <button id="CancelEdit"
+                        onClick={() => sumir(classe2)}
+                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Não </button>
                 </div>
             </div>
 
-
-            <div id="mudal_DEL" className="absolute top-[200px] right-[460px] z-20 bg-slate-400 w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center hidden">
+            <div id="mudal_DEL" className="absolute top-[200px] right-[460px] z-20 bg-[#d9d9d9] w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center hidden">
                 <div id="item_para_excluir" className="w-full h-3/4 flex justify-center items-center rounded-t-md flex-col relative">
 
                     <h1 className="absolute top-10 text-2xl">Deletando um produto</h1>
@@ -202,52 +213,56 @@ const TelaProdutoPage = () => {
                 </div>
 
                 <div id="botoes" className="w-full h-1/4  flex justify-around items-center rounded-b-2xl">
-                    <button id="ConfirmDelete" onClick={() => { handleDeleteProduct(selectedItemId); sumir(classe3) }} className="bg-gradient-to-br from-indigo-500 rounded-full h-[60%] w-[40%] text-2xl"> Sim </button>
-                    <button id="CancelDelete" onClick={() => sumir(classe3)} className="bg-gradient-to-br from-indigo-500 h-[60%] w-[40%] text-2xl rounded-full"> Não </button>
+                    <button id="ConfirmDelete"
+                        onClick={() => { handleDeleteProduct(selectedItemId); sumir(classe3) }}
+                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Sim </button>
+                    <button id="CancelDelete"
+                        onClick={() => sumir(classe3)}
+                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Não </button>
                 </div>
             </div>
 
-            <div id="CartProducts" className="flex justify-center items-center bg-slate-400 w-3/5 h-screen flex-col border-dashed border-b-2 border-r-2 border-black">
-                <div id="titulo-cart" className="flex bg-yellow-300 w-full justify-around">
-                    <h1 className="text-xl text-center w-1/3"> ID </h1>
-                    <h1 className="text-xl text-center w-1/3"> Nome </h1>
-                    <h1 className="text-xl text-center w-1/3"> Valor </h1>
+            <div id="tudao" className="w-4/5 h-full flex justify-between items-center flex-row bg-[#d9d9d9] rounded-xl border-[1px] shadow-2xl p-4" >
+
+
+                <div id="CartProducts" className="flex justify-center items-center w-2/4 h-3/4 flex-col border-[8px] border-gray-400 p-2 rounded-xl">
+                    <div id="titulo-cart" className="flex bg-[#226777] text-white w-full justify-around">
+                        <h1 className="text-xl text-center w-1/3"> ID </h1>
+                        <h1 className="text-xl text-center w-1/3"> Nome </h1>
+                        <h1 className="text-xl text-center w-1/3"> Valor </h1>
+                    </div>
+                    <div id="itens-cart" className="w-full overflow-auto h-full">
+                        {products.map((product) => (
+                            <ul className={`cursor-pointer flex w-full justify-around ${selectedItemId === product.id_produto ? "border-[2px] border-[#333333]" : ""}`}
+                                key={product.id_produto}
+                                onClick={() => toggleItemSelection(product.id_produto)}
+                            >
+                                <li className="text-center w-1/3 text-xl" key={`id_${product.id_produto}`}> {product.id_produto}</li>
+                                <li className="text-center w-1/3 text-xl" key={`nome_${product.id_produto}`}> {product.nome}</li>
+                                <li className="text-center w-1/3 text-xl" key={`preco${product.id_produto}`}> {product.preco}</li>
+                            </ul>
+                        ))}
+                    </div>
                 </div>
-                <div id="itens-cart" className="w-full overflow-auto h-full">
-                    {products.map((product) => (
-                        <ul className={`cursor-pointer flex w-full justify-around ${selectedItemId === product.id_produto ? "bg-blue-200" : ""}`}
-                            key={product.id_produto}
-                            onClick={() => toggleItemSelection(product.id_produto)}
-                        >
-                            <li className="text-center w-1/3 text-xl" key={`id_${product.id_produto}`}> {product.id_produto}</li>
-                            <li className="text-center w-1/3 text-xl" key={`nome_${product.id_produto}`}> {product.nome}</li>
-                            <li className="text-center w-1/3 text-xl" key={`preco${product.id_produto}`}> {product.preco}</li>
-                        </ul>
-                    ))}
+
+                <div className="h-[80%] w-1/5 bg-slate-400 flex flex-col justify-center items-center gap-10 rounded-[10px]">
+
+                    {/* <CrudButton isVisible={true} texto={selectedItemId !== null ? selectedItemId : 0} /> */}
+
+                    <div
+                        className="w-[90%] h-[15%] flex justify-center items-center gap-3 bg-blue-500 rounded-[10px] text-2xl text-white">
+                        {selectedItemId !== null ? selectedItemId : 0}
+                    </div>
+
+                    <CrudButton id="BtnInserir" isVisible={true} texto="Inserir novo produto" onClick={() => aparecer(classe1)} />
+
+                    <CrudButton id="BtnEditar" isVisible={isVisible} texto="Editar o produto" onClick={() => handleEditProduct(selectedItemId)} />
+
+                    <CrudButton id="BtnDeletar" isVisible={isVisible} texto="Deletar o produto" onClick={() => aparecer(classe3)} />
+
                 </div>
+
             </div>
-
-            <div className="h-screen w-1/5 bg-slate-400 flex flex-col justify-center items-center gap-10">
-
-                <div className="shadow-[0_35px_60px_35px_rgba(0,0,0,0.3)] bg-[#DCDCDC] opacity-70 w-[90%] h-[15%] flex flex-col items-center rounded-2xl">
-                    <h1 className="text-xl text-center"> Código </h1>
-                    <h2 className="text-xl mt-10"> {selectedItemId !== null ? selectedItemId : ""} </h2>
-                </div>
-
-                <button className="shadow-[0_35px_60px_35px_rgba(0,0,0,0.3)] bg-[#DCDCDC] opacity-70 w-[90%] h-[15%] flex flex-col justify-center items-center rounded-2xl" onClick={() => aparecer(classe1)} >
-                    <h1 className="text-xl text-center"> Inserir um novo produto </h1>
-                </button>
-
-                <button id="BtnEditar" className="shadow-[0_35px_60px_35px_rgba(0,0,0,0.3)] bg-[#DCDCDC] opacity-70  w-[90%] h-[15%] flex flex-col justify-center items-center rounded-2xl hidden" onClick={() => handleEditProduct(selectedItemId)} >
-                    <h1 className="text-xl text-center"> Editar o produto </h1>
-                </button>
-
-                <button id="BtnlDeletar" className="shadow-[0_35px_60px_35px_rgba(0,0,0,0.3)] bg-[#DCDCDC] opacity-70  w-[90%] h-[15%] flex flex-col justify-center items-center rounded-2xl hidden" onClick={() => aparecer(classe3)} >
-                    <h1 className="text-xl text-center"> Deletar o produto </h1>
-                </button>
-
-            </div>
-
         </div>
     );
 };

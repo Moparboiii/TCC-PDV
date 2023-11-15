@@ -4,10 +4,10 @@ import NavbarComp from "../components/NavbarComp";
 const HomePage = () => {
 
   return (
-    <div className="flex justify-center items-center">
-      <NavbarComp></NavbarComp>
+    <div className="p-3 flex h-screen w-screen justify-center items-center">
+      <NavbarComp />
 
-      <div className="bg-slate-400 w-4/5 h-screen flex justify-center items-center">
+      <div className="bg-[#d9d9d9] w-4/5 h-full flex justify-center items-center rounded-xl border-[1px] shadow-2xl">
         <h1 className="text-7xl animate-jump-in"> Bem vindo a Casa De Carnes kanaa </h1>
       </div>
 

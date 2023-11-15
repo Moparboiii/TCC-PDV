@@ -31,7 +31,6 @@ app.get('/produto/:id', (req, res) => {
   const productId = req.params.id;
   connection.query(`SELECT * FROM produtos WHERE id_produto = ?`, [productId], (err, result) => {
     if (err) {
-      console.error('Erro na consulta:', err);
       res.status(500).json({ error: 'Erro ao buscar o produto.' });
     } else {
       if (result.length > 0) {
@@ -48,7 +47,6 @@ app.delete('/produto/:id', (req, res) => {
   const productId = req.params.id;
   connection.query(`DELETE FROM produtos WHERE id_produto = ?`, [productId], (err, result) => {
     if (err) {
-      console.error('Erro na consulta:', err);
       res.status(500).json({ error: 'Erro ao deletar o produto.' });
     } else {
       res.status(204).json({ mensagem: 'Produto deletado com suceddo.' });
@@ -63,7 +61,6 @@ app.put('/produto/:id', (req, res) => {
 
   connection.query(`UPDATE produtos SET nome = ?, preco = ?, quantidade = ? WHERE id_produto = ?`, [nome, preco, quantidade, productId], (err, result) => {
     if (err) {
-      console.error('Erro na consulta:', err);
       res.status(500).json({ error: 'Erro ao atualizar o produto.' });
     } else {
       if (result.affectedRows > 0) {

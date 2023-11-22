@@ -1,14 +1,20 @@
 import React from 'react';
 
-const ConfirmCancelButtons = ({ texto, isVisible, onClick }) => {
+const ConfirmCancelButtons = ({ onClick1, onClick2, className }) => {
     return (
-        <div id="botoes" className="w-full h-1/4 flex justify-around items-center rounded-b-2xl">
-            <button id="ConfirmEdit" onClick={onClick} className="bg-gradient-to-br from-indigo-500 rounded-full h-[60%] w-[40%] text-2xl"> Sim </button>
-            <button id="CancelEdit" onClick={onClick} className="bg-gradient-to-br from-indigo-500  h-[60%] w-[40%] text-2xl rounded-full"> Não </button>
+        <div id="botoes" className={`w-full flex flex-row justify-around items-center gap-3 ${className}`}>
+            <button
+                onClick={onClick1}
+                className="w-[50%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white">
+                Sim
+            </button>
+            <button
+                onClick={onClick2}
+                className="w-[50%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white">
+                Não
+            </button>
         </div>
     );
 };
-
-
 
 export default ConfirmCancelButtons;

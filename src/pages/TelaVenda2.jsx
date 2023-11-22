@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import NavbarComp from "../components/NavbarComp";
 import CardProducts from './../components/cards/CardProducts';
+import SalesModal from './../components/modals/SaleModal';
+import IMGMinus from '../assets/minus.png'
 
 const TelaVendaPage2 = () => {
     let classe2 = document.querySelector("#mudal");
+    let classe3 = document.querySelector("#navibar");
+    let classe4 = document.querySelector("#conteudo");
     const [productIdInput, setProductIdInput] = useState('');
     const [cart, setCart] = useState([]);
     const [soldOrders, setSoldOrders] = useState([]);
@@ -13,12 +17,18 @@ const TelaVendaPage2 = () => {
     const [itemTotal, setItemTotal] = useState(0.00); // Estado para a quantidade do item selecionado
     const [quantities, setQuantities] = useState({});   // Use o estado para rastrear a quantidade de cada produto no carrinho
 
-    const aparecer = (classe1) => {
+    const aparecer = (classe1, classe2, classe3) => {
         classe1.classList.remove("hidden")
+        classe1.classList.add("flex")
+        classe2.classList.add("blur-xl")
+        classe3.classList.add("blur-xl")
     };
 
-    const sumir = (classe1) => {
+    const sumir = (classe1, classe2, classe3) => {
         classe1.classList.add("hidden")
+        classe1.classList.remove("flex")
+        classe2.classList.remove("blur-xl")
+        classe3.classList.remove("blur-xl")
     };
 
     const handleProductIdInputChange = (event) => {
@@ -86,47 +96,80 @@ const TelaVendaPage2 = () => {
     const completeSale = () => {
         if (cart.length > 0) {
             // Adicionar os itens do carrinho à variável de itens vendidos
-            setSoldOrders((prevSoldOrders) => [...prevSoldOrders, ...cart]);
+            setSoldOrders((prevSoldOrders) => {
+                const updatedSoldOrders = cart.reduce((acc, cartItem) => {
+                    const newQuantity = quantities[cartItem.id_produto] || 0;
+
+                    if (newQuantity > 0) {
+                        // Adicionar ou atualizar apenas se a quantidade for maior que zero
+                        const existingSoldItem = prevSoldOrders.find((soldItem) => soldItem.id_produto === cartItem.id_produto);
+
+                        if (!existingSoldItem) {
+                            // Se o item não existir no soldOrders, adicioná-lo
+                            acc.push({
+                                ...cartItem,
+                                quantidade: newQuantity,
+                            });
+                        } else {
+                            // Se o item já existir no soldOrders, atualizar a quantidade
+                            existingSoldItem.quantidade = newQuantity;
+                        }
+                    } else {
+                        // Remover o item se a quantidade for zero
+                        acc = acc.filter((item) => item.id_produto !== cartItem.id_produto);
+                    }
+
+                    return acc;
+                }, []);
+
+                return updatedSoldOrders;
+            });
 
             // Limpar o carrinho de compras após a venda
-            setCart([]);
+            //setCart([]);
         }
     };
+
 
     const finishSale = async () => {
-        // Construa o objeto com os detalhes da venda
-        const vendaData = {
-            itens: soldOrders, // Array de itens vendidos
-            valorTotal: +getTotalOrderValue(), // Valor total da venda
-            DataHora: new Date(), // Data/hora da venda
-        };
+        // Se houver alterações no carrinho, atualize soldOrders
 
-        // if (!cart.length) {
-        //   alert('Por favor, selecione itens e insira o valor da venda.');
-        //   return;
-        // }
+        const currentDate = new Date();
+        const formattedDate = currentDate.toISOString().slice(0, 19).replace("T", " ");
 
-        try {
-            // Faça uma solicitação POST para registrar a venda no servidor
-            const response = await axios.post('http://localhost:6000/registrar-venda', vendaData);
+        if (cart.length > 0) {
+            // Construa o objeto com os detalhes da venda
+            const vendaData = {
+                itens: soldOrders, // Array de itens do carrinho
+                data_hora: formattedDate, // Data/hora da venda
+                valor_total: +getTotalOrderValue(), // Valor total do carrinho
+            };
 
-            if (response.status === 201) {
-                alert('Venda registrada com sucesso!');
-                // Limpe os dados da venda, como itens selecionados, valor total, etc.
-                setSoldOrders([]);
-                setCart([]);
-                setProductIdInput('');
-                setItemTotal("0,00");
-                setQuantities({});
-                sumir(classe2);
-            } else {
-                alert('Erro ao registrar a venda.');
+            try {
+                // Faça uma solicitação POST para registrar a venda no servidor
+                console.log(vendaData)
+                const response = await axios.post('http://localhost:5000/registrar-venda', vendaData);
+
+                if (response.status === 201) {
+                    alert('Venda registrada com sucesso!');
+                    // Limpe os dados da venda, como itens selecionados, valor total, etc.
+                    setSoldOrders([]);
+                    setProductIdInput('');
+                    setItemTotal("0,00");
+                    setQuantities({});
+                    sumir(classe2);
+                } else {
+                    alert('Erro ao registrar a venda.');
+                }
+            } catch (error) {
+                console.error('Erro ao registrar a venda:', error);
+                alert('Erro ao registrar a venda. Verifique o console para detalhes.');
             }
-        } catch (error) {
-            console.error('Erro ao registrar a venda:', error);
-            alert('Erro ao registrar a venda. Verifique o console para detalhes.');
+        } else {
+            alert('Carrinho vazio. Adicione itens ao carrinho antes de prosseguir.');
         }
     };
+
 
     const getTotalProductValue = () => {
         const total = itemTotal * quantities[selectedItemId];
@@ -145,43 +188,57 @@ const TelaVendaPage2 = () => {
     const selectedProduct = cart.find((product) => product.id_produto === selectedItemId);
     const selectedProductName = selectedProduct ? selectedProduct.nome : '';
 
+    const removeItemFromCart = (itemId) => {
+        // Verifique se o item está no carrinho
+        const isInCart = cart.some((product) => product.id_produto === itemId);
+
+        if (isInCart) {
+            // Verifique a quantidade atual do item
+            const currentQuantity = quantities[itemId] || 0;
+
+            if (currentQuantity > 1) {
+                // Se a quantidade for maior que 1, apenas atualize a quantidade
+                setQuantities({
+                    ...quantities,
+                    [itemId]: currentQuantity - 1,
+                });
+            } else {
+                // Se a quantidade for 1, remova completamente o item do carrinho
+                const updatedCart = cart.filter((product) => product.id_produto !== itemId);
+                setCart(updatedCart);
+
+                // Remova a quantidade do produto do estado
+                const { [itemId]: removedQuantity, ...updatedQuantities } = quantities;
+                setQuantities(updatedQuantities);
+            }
+        }
+    };
+
+
+
     return (
         <div className="flex w-screen h-screen justify-center items-center p-3">
 
-            <NavbarComp />
+            <NavbarComp id='navibar' />
+
+            <SalesModal
+                id='mudal'
+                children1={
+                    soldOrders.map((product) => (
+                        <ul className="flex w-full justify-around border-dashed border-b-2 border-black" key={product.id} onClick={() => toggleItemSelection(product.id)}>
+                            <li className="text-center w-1/3 border-dashed border-r-2 border-black"> {product.nome}</li>
+                            <li className="text-center w-1/3 border-dashed border-r-2 border-black"> {product.preco}</li>
+                            <li className="text-center w-1/3"> {quantities[product.id_produto]}</li> {/* Exiba a quantidade aqui */}
+                        </ul>
+                    ))
+                }
+                onClick1={() => { sumir(classe2, classe3, classe4); finishSale() }}
+                onClick2={() => { sumir(classe2, classe3, classe4) }}
+                TotalValue={getTotalOrderValue().replace(".", ",")}
+            />
 
 
-            <div id="mudal" className="absolute top-[250px] right-[350px] z-20 bg-[#BED5DD] w-[50%] h-[50%] rounded-2xl text-center border-solid border-8 border-black hidden">
-                <h2 className="text-2xl border-dashed border-b-2 border-black">Resumo da Venda:</h2>
-                <div className="flex justify-center items-center w-full h-[93%] ">
-                    <div id="SoldProducts" className="flex justify-center items-center bg-[#BED5DD] w-1/2 h-full flex-col rounded-bl-3xl">
-                        <div id="titulo-sold" className="flex bg-yellow-300 w-full justify-around">
-                            <h1 className="text-xl w-1/3 text-center"> Produto </h1>
-                            <h1 className="text-xl w-1/3 text-center"> Valor </h1>
-                            <h1 className="text-xl w-1/3 text-center"> Quantidade </h1> {/* Adicione este item */}
-                        </div>
-                        <div id="itens-sold" className="w-full overflow-auto h-full border-dashed border-b-2 border-r-2 border-l-2 border-black">
-                            {soldOrders.map((product) => (
-                                <ul className="flex w-full justify-around border-dashed border-b-2 border-black" key={product.id} onClick={() => toggleItemSelection(product.id)}>
-                                    <li className="text-center w-1/3 border-dashed border-r-2 border-black"> {product.nome}</li>
-                                    <li className="text-center w-1/3 border-dashed border-r-2 border-black"> {product.preco}</li>
-                                    <li className="text-center w-1/3"> {quantities[product.id_produto]}</li> {/* Exiba a quantidade aqui */}
-                                </ul>
-                            ))}
-                        </div>
-                    </div>
-                    <div id="FinishOrder" className="bg-[#BED5DD] w-1/2 h-full flex justify-center items-center flex-col gap-20 rounded-br-3xl">
-                        <div className="shadow-[0_35px_60px_35px_rgba(0,0,0,0.3)] w-[80%] h-[50%] flex flex-col items-center rounded-2xl">
-                            <h1 className="text-3xl text-center"> Valor Total da venda </h1>
-                            <h2 className="text-3xl mt-20">R$ {getTotalOrderValue().replace(".", ",")}</h2>
-                        </div>
-                        <button className="bg-gradient-to-br from-indigo-500 rounded-full w-[70%] h-[10%]" onClick={() => { sumir(classe2); finishSale() }}>Finalizar Venda</button>
-                    </div>
-                </div>
-            </div>
-
-
-            <div className="w-4/5 h-full flex justify-center items-center flex-col bg-[#d9d9d9] rounded-xl border-[1px] shadow-2xl p-4">
+            <div id='conteudo' className="w-4/5 h-full flex justify-center items-center flex-col bg-[#d9d9d9] rounded-xl border-[1px] shadow-2xl p-4">
                 <div className="bg-[#226777] w-full h-1/5 rounded-[10px] flex justify-center items-center">
                     <h1 className="text-white text-5xl">{selectedProductName}</h1>
 
@@ -216,13 +273,20 @@ const TelaVendaPage2 = () => {
                         <div id="itens-cart" className="w-full overflow-auto h-full relative">
                             {cart.map((product) => (
                                 <ul
-                                    className={`cursor-pointer flex w-full justify-around ${selectedItemId === product.id_produto ? "border-[2px] border-[#333333]" : ""}`}
+                                    className={`cursor-pointer flex w-full justify-around relative ${selectedItemId === product.id_produto ? "border-[2px] border-[#333333]" : ""}`}
                                     key={product.id_produto}
                                     onClick={() => toggleItemSelection(product.id_produto)}
                                 >
                                     <li className="text-center w-1/3"> {product.id_produto}</li>
                                     <li className="text-center w-1/3"> {product.nome}</li>
                                     <li className="text-center w-1/3"> {product.preco}</li>
+                                    <button
+                                        className="h-1/2 text-white px-2 py-1 rounded absolute right-0"
+                                        onClick={() => removeItemFromCart(product.id_produto)}
+                                    >
+                                        <img src={IMGMinus} alt="" className="w-5 h-5" />
+
+                                    </button>
                                 </ul>
                             ))}
                             <div className="absolute bottom-0 left-64 h-12 w-[30%]">
@@ -232,7 +296,7 @@ const TelaVendaPage2 = () => {
                                         className='w-full h-full flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white'
                                         onClick={() => {
                                             completeSale();
-                                            aparecer(classe2);
+                                            aparecer(classe2, classe3, classe4);
                                         }}
                                     >
                                         Prosseguir Venda

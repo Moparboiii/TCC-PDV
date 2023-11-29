@@ -1,35 +1,23 @@
 import React, { useState } from "react";
 import axios from "axios";
 import NavbarComp from "../components/NavbarComp";
-import CardProducts from './../components/cards/CardProducts';
-import SalesModal from './../components/modals/SaleModal';
+import CardProducts from '../components/cards/CardProducts';
+import SalesModal from '../components/modals/SaleModal';
 import IMGMinus from '../assets/minus.png'
 
-const TelaVendaPage2 = () => {
-    let classe2 = document.querySelector("#mudal");
-    let classe3 = document.querySelector("#navibar");
-    let classe4 = document.querySelector("#conteudo");
+const TelaVendaPage = () => {
     const [productIdInput, setProductIdInput] = useState('');
     const [cart, setCart] = useState([]);
     const [soldOrders, setSoldOrders] = useState([]);
     const [selectedItemId, setSelectedItemId] = useState("-");
-    //const [dataHora, setDataHora] = useState();
     const [itemTotal, setItemTotal] = useState(0.00); // Estado para a quantidade do item selecionado
     const [quantities, setQuantities] = useState({});   // Use o estado para rastrear a quantidade de cada produto no carrinho
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [totalVenda, setTotalVenda] = useState(0)
 
-    const aparecer = (classe1, classe2, classe3) => {
-        classe1.classList.remove("hidden")
-        classe1.classList.add("flex")
-        classe2.classList.add("blur-xl")
-        classe3.classList.add("blur-xl")
-    };
-
-    const sumir = (classe1, classe2, classe3) => {
-        classe1.classList.add("hidden")
-        classe1.classList.remove("flex")
-        classe2.classList.remove("blur-xl")
-        classe3.classList.remove("blur-xl")
-    };
+    function exitmodal() {
+        setIsModalOpen(false)
+    }
 
     const handleProductIdInputChange = (event) => {
         setProductIdInput(event.target.value);
@@ -64,8 +52,6 @@ const TelaVendaPage2 = () => {
 
                     toggleItemSelection(fetchedProduct.id_produto);
                     setProductIdInput(''); // Limpar o input
-
-                    console.log(cart.length)
                 }
             } catch (error) {
                 console.error('Erro ao buscar o produto:', error);
@@ -77,11 +63,9 @@ const TelaVendaPage2 = () => {
         if (selectedItemId === itemId) {
             // Se o item já está selecionado, desmarque-o
             setSelectedItemId(itemId);
-
         } else {
             // Caso contrário, marque o novo item como selecionado
             setSelectedItemId(itemId);
-
         }
 
         // Atualize o valor total do item selecionado
@@ -125,11 +109,12 @@ const TelaVendaPage2 = () => {
                 return updatedSoldOrders;
             });
 
+            setIsModalOpen(true)
+
             // Limpar o carrinho de compras após a venda
             //setCart([]);
         }
     };
-
 
     const finishSale = async () => {
         // Se houver alterações no carrinho, atualize soldOrders
@@ -147,7 +132,6 @@ const TelaVendaPage2 = () => {
 
             try {
                 // Faça uma solicitação POST para registrar a venda no servidor
-                console.log(vendaData)
                 const response = await axios.post('http://localhost:5000/registrar-venda', vendaData);
 
                 if (response.status === 201) {
@@ -157,7 +141,6 @@ const TelaVendaPage2 = () => {
                     setProductIdInput('');
                     setItemTotal("0,00");
                     setQuantities({});
-                    sumir(classe2);
                 } else {
                     alert('Erro ao registrar a venda.');
                 }
@@ -170,11 +153,16 @@ const TelaVendaPage2 = () => {
         }
     };
 
-
     const getTotalProductValue = () => {
-        const total = itemTotal * quantities[selectedItemId];
-        return total.toFixed(2);
-    }
+        const totalVenda = itemTotal * quantities[selectedItemId];
+        setTotalVenda(totalVenda.toFixed(2)); // Atualizar o estado aqui
+
+        if (isNaN(totalVenda)) {
+            return "0,00";
+        }
+        return totalVenda.toFixed(2);
+    };
+
 
     const getTotalOrderValue = () => {
         const total = soldOrders.reduce((sum, item) => {
@@ -214,29 +202,22 @@ const TelaVendaPage2 = () => {
         }
     };
 
-
-
     return (
         <div className="flex w-screen h-screen justify-center items-center p-3">
 
             <NavbarComp id='navibar' />
 
-            <SalesModal
-                id='mudal'
-                children1={
-                    soldOrders.map((product) => (
+            {isModalOpen &&
+                <SalesModal id='mudal' onClick1={() => { finishSale() }} onClick2={() => { exitmodal() }} TotalValue={getTotalOrderValue().replace(".", ",")}>
+                    {soldOrders.map((product) => (
                         <ul className="flex w-full justify-around border-dashed border-b-2 border-black" key={product.id} onClick={() => toggleItemSelection(product.id)}>
                             <li className="text-center w-1/3 border-dashed border-r-2 border-black"> {product.nome}</li>
                             <li className="text-center w-1/3 border-dashed border-r-2 border-black"> {product.preco}</li>
                             <li className="text-center w-1/3"> {quantities[product.id_produto]}</li> {/* Exiba a quantidade aqui */}
                         </ul>
-                    ))
-                }
-                onClick1={() => { sumir(classe2, classe3, classe4); finishSale() }}
-                onClick2={() => { sumir(classe2, classe3, classe4) }}
-                TotalValue={getTotalOrderValue().replace(".", ",")}
-            />
-
+                    ))}
+                </SalesModal>
+            }
 
             <div id='conteudo' className="w-4/5 h-full flex justify-center items-center flex-col bg-[#d9d9d9] rounded-xl border-[1px] shadow-2xl p-4">
                 <div className="bg-[#226777] w-full h-1/5 rounded-[10px] flex justify-center items-center">
@@ -260,8 +241,9 @@ const TelaVendaPage2 = () => {
                         />
 
                         <CardProducts name={'Quantidade'} code={quantities[selectedItemId]} className="" />
-                        <CardProducts name={'Valor Total'} code={getTotalProductValue().replace(".", ",")} className="" />
+                        <CardProducts name={'Valor Total'} code={getTotalOrderValue().replace(".", ",")} className="" />
                         <CardProducts name={'Valor unitário'} code={itemTotal} className="" />
+
                     </div>
 
                     <div id="CartProducts" className="flex justify-center items-center w-2/4 h-3/4 flex-col border-[8px] border-gray-400 p-2 rounded-xl ">
@@ -296,7 +278,6 @@ const TelaVendaPage2 = () => {
                                         className='w-full h-full flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white'
                                         onClick={() => {
                                             completeSale();
-                                            aparecer(classe2, classe3, classe4);
                                         }}
                                     >
                                         Prosseguir Venda
@@ -313,4 +294,4 @@ const TelaVendaPage2 = () => {
     );
 };
 
-export default TelaVendaPage2;
+export default TelaVendaPage;

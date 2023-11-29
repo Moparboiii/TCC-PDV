@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import NavbarComp from "../components/NavbarComp";
-import CardProducts from "../components/cards/CardProducts";
 import CrudButton from "../components/buttons/CrudButton";
 import ProductsModal from "../components/modals/ProductsModal";
+import InputPadrao from "../components/inputs/InputPadrao";
 import ConfirmCancelButtons from "../components/buttons/ConfirmCancelButtons";
 
 const TelaProdutoPage = () => {
-    const classe1 = document.querySelector("#mudal_INS");
-    const classe2 = document.querySelector("#mudal_EDIT");
-    const classe3 = document.querySelector("#mudal_DEL");
-    const classe4 = document.querySelector("#tudao");
     const [products, setProducts] = useState([]);
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [nome, setNome] = useState("");
@@ -18,17 +14,20 @@ const TelaProdutoPage = () => {
     const [quantidade, setQuantidade] = useState("");
     const [selectedProductData, setSelectedProductData] = useState(null);
     const [isVisible, setIsVisible] = useState(false)
+    const [isInsertOpen, setIsInsertOpen] = useState(false)
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+
+    async function fetchProdutos() {
+        try {
+            const response = await axios.get('http://localhost:5000/produtos'); // Substitua pela URL correta da sua API
+            setProducts(response.data); // Atualize o estado com os produtos obtidos da API
+        } catch (error) {
+            console.error('Erro ao buscar produtos:', error);
+        }
+    }
 
     useEffect(() => {
-        async function fetchProdutos() {
-            try {
-                const response = await axios.get('http://localhost:5000/produtos'); // Substitua pela URL correta da sua API
-                setProducts(response.data); // Atualize o estado com os produtos obtidos da API
-            } catch (error) {
-                console.error('Erro ao buscar produtos:', error);
-            }
-        }
-
         fetchProdutos();
     }, []);
 
@@ -57,7 +56,6 @@ const TelaProdutoPage = () => {
 
                 // Atualize o estado local para refletir a criação do novo produto
                 attList()
-                sumir(classe1)
 
             } else {
 
@@ -70,7 +68,7 @@ const TelaProdutoPage = () => {
         }
     };
 
-    const handleDeleteProduct = async (productId) => {
+    async function handleDeleteProduct(productId) {
         try {
             // Realize uma solicitação de exclusão ao servidor
             await axios.delete(`http://localhost:5000/produto/${productId}`);
@@ -80,12 +78,13 @@ const TelaProdutoPage = () => {
                 prevProducts.filter((product) => product.id_produto !== productId)
             );
 
-            sumir(classe2);
+            setIsDeleteOpen(false)
 
         } catch (error) {
-            alert.error(`Erro ao excluir o produto: ${error}`);
+            console.error(`Erro ao excluir o produto: ${error}`);
         }
-    };
+    }
+
 
     const handleEditProduct = (productId) => {
         const productToEdit = products.find((product) => product.id_produto === productId);
@@ -96,7 +95,6 @@ const TelaProdutoPage = () => {
             setPreco(productToEdit.preco.toString()); // Converte para string para exibição
             setQuantidade(productToEdit.quantidade.toString()); // Converte para string para exibição
             setSelectedProductData(productToEdit); // Armazena os dados do item selecionado
-            aparecer(classe2); // Mostra o modal de edição
         }
     };
 
@@ -115,7 +113,6 @@ const TelaProdutoPage = () => {
             if (response.status === 200) {
                 // Atualize o estado local para refletir a edição
                 attList();
-                sumir(classe2); // Esconda o modal de edição
             } else {
                 // Lidar com erros
                 alert("Erro ao editar o produto");
@@ -123,15 +120,6 @@ const TelaProdutoPage = () => {
         } catch (error) {
             console.error("Erro ao enviar a solicitação:", error);
         }
-    };
-
-    const aparecer = (element) => {
-        element.classList.remove("hidden")
-        classe4.classList.add("blur-3xl")
-    };
-    const sumir = (element) => {
-        element.classList.add("hidden")
-        classe4.classList.remove("blur-3xl")
     };
 
     const toggleItemSelection = (itemId) => {
@@ -151,31 +139,54 @@ const TelaProdutoPage = () => {
 
             <NavbarComp />
 
-            <div id="mudal_INS" className="absolute top-[200px] right-[460px] z-20 bg-[#d9d9d9] w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex-col justify-center items-center hidden">
-                <div id="item_para_excluir" className="w-full h-3/4 flex justify-center items-center rounded-t-md flex-col relative">
+            {isInsertOpen &&
+                <ProductsModal>
+                    <h1 className='h-[10%] text-3xl font-semibold'>Cadastre uma produto</h1>
+                    <form action="" onSubmit={handleCreateProduct} className='h-[90%] flex flex-col justify-evenly items-center w-full gap-2'>
+                        <InputPadrao labelName="Nome do produto" inputName="nome_produto" inputId="input-nome-produto" inputPlaceholder="Digite o Nome do produto" type="text"
+                            obrigatorio={true} classNameInput="text-md bg-transparent pl-3 border-[1px] rounded-md h-10 border-[#333333]" onChange={(e) => setNome(e.target.value)} />
+                        <InputPadrao labelName="Valor do produto" inputName="valor_produto" inputId="input-valor-produto" inputPlaceholder="Digite o valor do produto" type="text"
+                            obrigatorio={true} classNameInput="text-md bg-transparent pl-3 border-[1px] rounded-md h-10 border-[#333333]" onChange={(e) => setPreco(e.target.value)} />
+                        <InputPadrao labelName="Quantidade estoque" inputName="qtd_estoque" inputId="input-quantidade-estoque" inputPlaceholder="Digite a quantidade em estoque" type="text"
+                            obrigatorio={true} classNameInput="text-md bg-transparent pl-3 border-[1px] rounded-md h-10 border-[#333333]" onChange={(e) => setQuantidade(e.target.value)} />
+                        <div className='flex items-start justify-start flex-col h-fit w-full gap-6'>
+                        </div>
+                        <div className="w-[90%] h-[10%] absolute bottom-4">
+                            <ConfirmCancelButtons onClick2={() => { setIsInsertOpen(false) }} />
+                        </div>
+                    </form>
+                </ProductsModal>
+            }
 
-                    <h1 className="absolute top-10 text-2xl">Inserir um produto</h1>
+            {isEditOpen &&
+                <ProductsModal>
+                    <h1 className='h-[10%] text-3xl font-semibold'>Altere um produto</h1>
+                    <form action="" onSubmit={(event) => handleEditConfirmation(selectedItemId)} className='h-[90%] flex flex-col justify-evenly items-center w-full gap-2'>
+                        <InputPadrao labelName="Nome do produto" inputName="nome_produto" inputId="input-nome-produto" inputPlaceholder="Digite o Nome do produto" type="text" value={nome}
+                            obrigatorio={true} classNameInput="text-md bg-transparent pl-3 border-[1px] rounded-md h-10 border-[#333333]" onChange={(e) => setNome(e.target.value)} />
+                        <InputPadrao labelName="Valor do produto" inputName="valor_produto" inputId="input-valor-produto" inputPlaceholder="Digite o valor do produto" type="text" value={preco}
+                            obrigatorio={true} classNameInput=" text-md bg-transparent pl-3 border-[1px] rounded-md h-10 border-[#333333]" onChange={(e) => setPreco(e.target.value)} />
+                        <InputPadrao labelName="Quantidade estoque" inputName="qtd_estoque" inputId="input-quantidade-estoque" inputPlaceholder="Digite a quantidade em estoque" type="text" value={quantidade}
+                            obrigatorio={true} classNameInput="text-md bg-transparent pl-3 border-[1px] rounded-md h-10 border-[#333333]" onChange={(e) => setQuantidade(e.target.value)} />
+                        <div className='flex items-start justify-start flex-col h-fit w-full gap-6'>
+                        </div>
+                        <div className="w-[90%] h-[10%] absolute bottom-4">
+                            <ConfirmCancelButtons onClick2={() => { setIsEditOpen(false) }} />
+                        </div>
+                    </form>
+                </ProductsModal>
+            }
 
-                    <label htmlFor="nome">Nome do Produto:</label>
-                    <input type="text" id="nome" name="nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
+            {isDeleteOpen &&
+                <ProductsModal>
+                    <h3 className="absolute top-10 text-3xl font-semibold">Deletando um produto</h3>
 
-                    <label htmlFor="preco">Preço:</label>
-                    <input type="text" id="preco" name="preco" value={preco} onChange={(e) => setPreco(e.target.value)} required />
-
-                    <label htmlFor="quantidade">Quantidade:</label>
-                    <input type="text" id="quantidade" name="quantidade" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} required />
-
-                </div>
-
-                <div id="botoes" className="w-full h-1/4 flex justify-around items-center rounded-b-md">
-                    <button id="ConfirmInsert"
-                        onClick={() => handleCreateProduct()}
-                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Sim </button>
-                    <button id="CancelInsert"
-                        onClick={() => sumir(classe1)}
-                        className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Não </button>
-                </div>
-            </div>
+                    <label className="text-xl"> Tem certeza que seja excluir o produto {selectedItemId} ? </label>
+                    <div className="w-[90%] h-[10%] absolute bottom-4">
+                        <ConfirmCancelButtons onClick1={() => { handleDeleteProduct(selectedItemId) }} onClick2={() => { setIsDeleteOpen(false) }} />
+                    </div>
+                </ProductsModal>
+            }
 
             <div id="mudal_EDIT" className="absolute top-[200px] right-[460px] z-20 bg-[#d9d9d9] w-[50%] h-[50%] rounded-2xl border-solid border-8 border-black text-center flex flex-col justify-center items-center hidden">
                 <div id="item_para_excluir" className="w-full h-3/4 flex justify-center items-center rounded-t-md flex-col relative">
@@ -198,7 +209,7 @@ const TelaProdutoPage = () => {
                         onClick={() => handleEditConfirmation(selectedProductData.id_produto)}
                         className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Sim </button>
                     <button id="CancelEdit"
-                        onClick={() => sumir(classe2)}
+
                         className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Não </button>
                 </div>
             </div>
@@ -214,10 +225,10 @@ const TelaProdutoPage = () => {
 
                 <div id="botoes" className="w-full h-1/4  flex justify-around items-center rounded-b-2xl">
                     <button id="ConfirmDelete"
-                        onClick={() => { handleDeleteProduct(selectedItemId); sumir(classe3) }}
+                        onClick={() => { handleDeleteProduct(selectedItemId); }}
                         className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Sim </button>
                     <button id="CancelDelete"
-                        onClick={() => sumir(classe3)}
+
                         className="w-[30%] h-[50%] flex justify-center items-center gap-3 hover:opacity-90 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-105 duration-300 rounded-[10px] text-white"> Não </button>
                 </div>
             </div>
@@ -247,18 +258,15 @@ const TelaProdutoPage = () => {
 
                 <div className="h-[80%] w-1/5 bg-slate-400 flex flex-col justify-center items-center gap-10 rounded-[10px]">
 
-                    {/* <CrudButton isVisible={true} texto={selectedItemId !== null ? selectedItemId : 0} /> */}
-
-                    <div
-                        className="w-[90%] h-[15%] flex justify-center items-center gap-3 bg-blue-500 rounded-[10px] text-2xl text-white">
+                    <div className="w-[90%] h-[15%] flex justify-center items-center gap-3 bg-blue-500 rounded-[10px] text-2xl text-white">
                         {selectedItemId !== null ? selectedItemId : 0}
                     </div>
 
-                    <CrudButton id="BtnInserir" isVisible={true} texto="Inserir novo produto" onClick={() => aparecer(classe1)} />
+                    <CrudButton id="BtnInserir" isVisible={true} texto="Inserir novo produto" onClick={() => { setIsInsertOpen(true) }} />
 
-                    <CrudButton id="BtnEditar" isVisible={isVisible} texto="Editar o produto" onClick={() => handleEditProduct(selectedItemId)} />
+                    <CrudButton id="BtnEditar" isVisible={isVisible} texto="Editar o produto" onClick={() => { handleEditProduct(selectedItemId); setIsEditOpen(true) }} />
 
-                    <CrudButton id="BtnDeletar" isVisible={isVisible} texto="Deletar o produto" onClick={() => aparecer(classe3)} />
+                    <CrudButton id="BtnDeletar" isVisible={isVisible} texto="Deletar o produto" onClick={() => { setIsDeleteOpen(true) }} />
 
                 </div>
 

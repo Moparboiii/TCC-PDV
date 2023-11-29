@@ -49,7 +49,7 @@ app.delete('/produto/:id', (req, res) => {
     if (err) {
       res.status(500).json({ error: 'Erro ao deletar o produto.' });
     } else {
-      res.status(204).json({ mensagem: 'Produto deletado com suceddo.' });
+      res.status(204).json({ mensagem: 'Produto deletado com sucesso.' });
     }
   });
 });
@@ -120,7 +120,7 @@ app.post('/registrar-venda', (req, res) => {
   );
 });
 
-// Rota para consultar todos os produtos
+// Rota para consultar todos as vendas
 app.get('/vendidos', (req, res) => {
   connection.query('SELECT * FROM vendas', (err, results) => {
     if (err) {
@@ -136,15 +136,23 @@ app.get('/vendidos', (req, res) => {
   });
 });
 
-// Rota para consultar um produto pelo ID
-app.get('/vendidos/:id', (req, res) => {
+// Rota para consultar uma venda pelo ID
+app.get('/vendidosById/:id', (req, res) => {
   const productId = req.params.id;
-  connection.query(`SELECT * FROM itens_vendidos WHERE id_venda = ?`, [productId], (err, result) => {
+
+  const query = `
+  SELECT itens_vendidos.id_produto, produtos.nome, produtos.preco, itens_vendidos.quantidade
+  FROM itens_vendidos
+  JOIN produtos ON itens_vendidos.id_produto = produtos.id_produto
+  WHERE itens_vendidos.id_venda = ?;
+`;
+
+  connection.query(query, [productId], (err, result) => {
     if (err) {
       res.status(500).json({ error: 'Erro ao buscar o pedido.' });
     } else {
       if (result.length > 0) {
-        res.json(result[0]);
+        res.json(result);
       } else {
         res.status(404).json({ error: 'Pedido não encontrado.' });
       }

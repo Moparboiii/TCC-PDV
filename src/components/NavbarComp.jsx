@@ -2,6 +2,7 @@ import React from "react";
 import Carrinho from "../assets/icons8-cart-50.svg";
 import Casinha from "../assets/icons8-home.svg";
 import Morfeu from "../assets/morfeu.png"
+import Lista from '../assets/icons8-lista-64.png'
 import "./css/NavbarComp.css";
 import NavButton from './buttons/NavButton';
 
@@ -16,6 +17,7 @@ const NavbarComp = ({ id }) => {
         <NavButton linkPage='/' texto='Home' image={Casinha} />
         <NavButton linkPage='/Venda' texto='Tela Venda' image={Carrinho} />
         <NavButton linkPage='/Produtos' texto='Tela Produtos' image={Carrinho} />
+        <NavButton linkPage='/vendas' texto='Tela Vendas' image={Lista} />
 
       </div>
     </div>

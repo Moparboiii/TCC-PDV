@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import NavbarComp from "../components/NavbarComp";
 import { format } from 'date-fns';
+import ProductsModal from "../components/modals/ProductsModal";
+import X from '../assets/icons8-x-50.png';
 
 const TelaVendidosPage = () => {
     const [sales, setSales] = useState([]);
     const [selectedSaleId, setSelectedSaleId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedSaleItems, setSelectedSaleItems] = useState([]);
+    const [produtos, setProdutos] = useState([]);
 
     useEffect(() => {
         async function fetchVendas() {
@@ -22,17 +24,26 @@ const TelaVendidosPage = () => {
         fetchVendas();
     }, []);
 
-    const toggleItemSelection = async (saleId) => {
+    async function toggleItemSelection(saleId) {
         setSelectedSaleId(saleId);
         setIsModalOpen(true);
+        console.log('to doido', saleId);
 
         try {
-            const response = await axios.get(`http://localhost:5000/vendidos/${saleId}`);
+            const response = await axios.get(`http://localhost:5000/vendidosById/${saleId}`);
             const items = response.data || [];
-            setSelectedSaleItems(Array.isArray(items) ? items : [items]);
+            setProdutos(Array.isArray(response.data) ? response.data : []);
+            console.log(produtos)
+            console.log(response.data)
+
         } catch (error) {
             console.error('Erro ao buscar detalhes dos itens vendidos:', error);
         }
+    };
+
+
+    const formatarData = (data) => {
+        return format(new Date(data), 'dd/MM/yyyy HH:mm:ss');
     };
 
     return (
@@ -52,9 +63,9 @@ const TelaVendidosPage = () => {
                                 key={sale.id_venda}
                                 onClick={() => toggleItemSelection(sale.id_venda)}
                             >
-                                <li className="text-center w-1/3 text-xl" key={`id_${sale.id_venda}`}> {sale.id_venda}</li>
-                                <li className="text-center w-1/3 text-xl" key={`nome_${sale.id_venda}`}> {sale.valor_total}</li>
-                                <li className="text-center w-1/3 text-xl" key={`preco${sale.id_venda}`}> {format(new Date(sale.data_hora), 'dd/MM/yyyy HH:mm:ss')}</li>
+                                <li className="text-center w-1/3 text-xl" > {sale.id_venda}</li>
+                                <li className="text-center w-1/3 text-xl" > {sale.valor_total}</li>
+                                <li className="text-center w-1/3 text-xl" > {formatarData(sale.data_hora)}</li>
                             </ul>
                         ))}
                     </div>
@@ -62,21 +73,32 @@ const TelaVendidosPage = () => {
             </div>
 
             {isModalOpen && (
-                <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-75">
-                    <div className="bg-white p-4 rounded-lg">
-                        <h2 className="text-2xl font-bold mb-4">Detalhes da Venda</h2>
-                        <p>ID Venda: {selectedSaleId}</p>
-                        <h3 className="text-xl font-bold mt-4">Itens:</h3>
-                        <ul>
-                            {selectedSaleItems.map((item) => (
-                                <li key={item.id_venda}>
-                                    Produto: {item.id_produto}, Quantidade: {item.quantidade}, Valor Unitário: {item.preco}
-                                </li>
-                            ))}
-                        </ul>
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded mt-4" onClick={() => setIsModalOpen(false)}>Fechar</button>
+                <ProductsModal>
+                    <button className="absolute top-5 right-6" onClick={() => setIsModalOpen(false)}>
+                        <img src={X} alt="" className="w-6 h-6" />
+                    </button>
+                    <h3 className="text-2xl">ID da venda: {selectedSaleId}</h3>
+                    <div className="w-full h-[90%] flex items-baseline justify-center">
+                        <div id="CartProducts" className="flex justify-center items-center w-full h-full flex-col border-[8px] border-gray-400 p-2 rounded-xl">
+                            <div id="titulo-cart" className="flex bg-[#226777] text-white w-full justify-around">
+                                <h1 className="text-xl text-center w-1/4"> ID </h1>
+                                <h1 className="text-xl text-center w-1/4"> Nome Produto </h1>
+                                <h1 className="text-xl text-center w-1/4"> Preco </h1>
+                                <h1 className="text-xl text-center w-1/4"> Quantidade </h1>
+                            </div>
+                            <div id="itens-cart" className="w-full overflow-auto h-full">
+                                {produtos.map((produto) => (
+                                    <ul className={`cursor-pointer flex w-full justify-around`} key={produto.id_produto}>
+                                        <li className="text-center w-1/4 text-xl" > {produto.id_produto}</li>
+                                        <li className="text-center w-1/4 text-xl" > {produto.nome}</li>
+                                        <li className="text-center w-1/4 text-xl" > {produto.preco}</li>
+                                        <li className="text-center w-1/4 text-xl" > {produto.quantidade}</li>
+                                    </ul>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </ProductsModal>
             )}
         </div>
     );

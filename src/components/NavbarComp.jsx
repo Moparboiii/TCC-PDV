@@ -17,7 +17,7 @@ const NavbarComp = ({ id }) => {
         <NavButton linkPage='/' texto='Home' image={Casinha} />
         <NavButton linkPage='/Venda' texto='Tela Venda' image={Carrinho} />
         <NavButton linkPage='/Produtos' texto='Tela Produtos' image={Carrinho} />
-        <NavButton linkPage='/vendas' texto='Tela Vendas' image={Lista} />
+        <NavButton linkPage='/vendas' texto='Histórico de vendas' image={Lista} />
 
       </div>
     </div>

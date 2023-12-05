@@ -16,12 +16,16 @@ const SalesModal = ({ className, children, id, TotalValue, onClick1, onClick2 })
                         {children}
                     </div>
                 </div>
-                <div className="bg-red-300 w-1/2 h-full flex flex-col justify-center items-center gap-3 relative p-4">
+                <div className="w-1/2 h-full flex flex-col justify-center items-center gap-3 relative p-4">
                     <h3 className="text-4xl h-1/3">Valor total da compra</h3>
+
                     <div className="bg-gray-300 w h-2/3 w-full flex items-center justify-center">
                         <h2 className="text-3xl"> R${TotalValue} </h2>
                     </div>
-                    <ConfirmCancelButtons className='h-1/3' onClick1={onClick1} onClick2={onClick2} />
+                    <div className="h-1/3 flex flex-col w-full justify-center items-center">
+                        <h4 className="text-xl h-2/3">Deseja finalizar?</h4>
+                        <ConfirmCancelButtons className='h-1/3' onClick1={onClick1} onClick2={onClick2} />
+                    </div>
                 </div>
             </div>
         </div>

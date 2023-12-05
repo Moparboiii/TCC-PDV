@@ -141,6 +141,10 @@ const TelaVendaPage = () => {
                     setProductIdInput('');
                     setItemTotal("0,00");
                     setQuantities({});
+                    setIsModalOpen(false)
+                    setCart([])
+                    selectedProductName = ''
+
                 } else {
                     alert('Erro ao registrar a venda.');
                 }
@@ -173,8 +177,17 @@ const TelaVendaPage = () => {
         return total.toFixed(2); // Formatar o resultado para ter 2 casas decimais
     }
 
+    const getTotalCartValue = () => {
+        const total = cart.reduce((sum, item) => {
+            const itemTotal = item.preco * (quantities[item.id_produto] || 0);
+            return sum + itemTotal;
+        }, 0);
+
+        return total.toFixed(2); // Formatar o resultado para ter 2 casas decimais
+    }
+
     const selectedProduct = cart.find((product) => product.id_produto === selectedItemId);
-    const selectedProductName = selectedProduct ? selectedProduct.nome : '';
+    let selectedProductName = selectedProduct ? selectedProduct.nome : '';
 
     const removeItemFromCart = (itemId) => {
         // Verifique se o item está no carrinho
@@ -241,7 +254,7 @@ const TelaVendaPage = () => {
                         />
 
                         <CardProducts name={'Quantidade'} code={quantities[selectedItemId]} className="" />
-                        <CardProducts name={'Valor Total'} code={getTotalOrderValue().replace(".", ",")} className="" />
+                        <CardProducts name={'Valor Total'} code={getTotalCartValue().replace(".", ",")} className="" />
                         <CardProducts name={'Valor unitário'} code={itemTotal} className="" />
 
                     </div>
